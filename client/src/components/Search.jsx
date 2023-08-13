@@ -11,6 +11,7 @@ function Search() {
     sort: 1,
     cuisine: [],
   });
+  let [, setSelectedPriceRange] = useState(null);
   let [locations, setLocations] = useState([]);
   let [restaurantList, setRestaurantList] = useState([]);
   let getLocationList = async () => {
@@ -24,6 +25,11 @@ function Search() {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    getLocationList();
+  });
+
   let getFilterDetails = async () => {
     let url = "https://zomatoapp-api.onrender.com/api/filter";
     let { data } = await axios.post(url, filter);
@@ -64,12 +70,23 @@ function Search() {
   };
 
   useEffect(() => {
-    getLocationList();
-  });
-  useEffect(() => {
     getFilterDetails();
     // eslint-disable-next-line
   }, [filter]);
+
+  const handlePriceRangeChange = async (event) => {
+    const selectedRange = event.target.value;
+    setSelectedPriceRange(selectedRange);
+
+    try {
+      const { data } = await axios.post(
+        `https://zomatoapp-api.onrender.com/api/filterPrice?priceRange=${selectedRange}`
+      );
+      setRestaurantList(data.products);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
 
   return (
     <>
@@ -172,36 +189,44 @@ function Search() {
                 </div>
               </div>
               <p className="mt-4 mb-2 fw-bold">Cost For Two</p>
-              <div>
+              <div className="d-flex flex-column">
                 <div className="ms-1">
-                  <input type="radio" className="form-check-input" />
-                  <label htmlFor="" className="form-check-label ms-1">
-                    less then 500
+                  <input
+                    type="radio"
+                    value="0-500"
+                    name="rad"
+                    onChange={handlePriceRangeChange}
+                  />
+                  <label className="form-check-label ms-1">Rs 0 - 500</label>
+                </div>
+                <div className="ms-1">
+                  <input
+                    type="radio"
+                    value="500-1000"
+                    name="rad"
+                    onChange={handlePriceRangeChange}
+                  />
+                  <label className="form-check-label ms-1">Rs 500 - 1000</label>
+                </div>
+                <div className="ms-1">
+                  <input
+                    type="radio"
+                    value="1000-1500"
+                    name="rad"
+                    onChange={handlePriceRangeChange}
+                  />
+                  <label className="form-check-label ms-1">
+                    Rs 1000 - 1500
                   </label>
                 </div>
                 <div className="ms-1">
-                  <input type="radio" className="form-check-input" />
-                  <label htmlFor="" className="form-check-label ms-1">
-                    500 to 1000
-                  </label>
-                </div>
-                <div className="ms-1">
-                  <input type="radio" className="form-check-input" />
-                  <label htmlFor="" className="form-check-label ms-1">
-                    1000 to 1500
-                  </label>
-                </div>
-                <div className="ms-1">
-                  <input type="radio" className="form-check-input" />
-                  <label htmlFor="" className="form-check-label ms-1">
-                    1500 to 2000
-                  </label>
-                </div>
-                <div className="ms-1">
-                  <input type="radio" className="form-check-input" />
-                  <label htmlFor="" className="form-check-label ms-1">
-                    2000+
-                  </label>
+                  <input
+                    type="radio"
+                    value="2000+"
+                    name="rad"
+                    onChange={handlePriceRangeChange}
+                  />
+                  <label className="form-check-label ms-1">Rs 2000+</label>
                 </div>
               </div>
               <p className="mt-4 mb-2 fw-bold">Sort</p>
@@ -248,7 +273,8 @@ function Search() {
                   <div className="d-flex align-items-center">
                     <img
                       src={"/images/" + restaurant.image}
-                      className="food-item" alt=""
+                      className="food-item"
+                      alt=""
                     />
                     <div className="ms-5">
                       <p className="h4 fw-bold">{restaurant.name}</p>

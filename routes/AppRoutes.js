@@ -23,6 +23,7 @@ AppRouter.post("/save-user-data", UserController.saveUserData);
 AppRouter.post("/login", UserController.userLogin);
 
 AppRouter.post("/filter", RestaurantController.filter);
+AppRouter.post("/filterPrice", RestaurantController.filterPrice);
 
 AppRouter.post("/create-order", PaymentController.createOrder);
 AppRouter.post("/verify-payment", PaymentController.verifyPayment);

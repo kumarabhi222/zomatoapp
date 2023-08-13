@@ -14,6 +14,52 @@ function Search() {
   let [, setSelectedPriceRange] = useState(null);
   let [locations, setLocations] = useState([]);
   let [restaurantList, setRestaurantList] = useState([]);
+  // pagination states.
+  const [pageData, setPageData] = useState([]);
+  const [page, setPage] = useState(1);
+  const [pageCount, setPageCount] = useState(0);
+
+  const fetchProductsByPagination = async () => {
+    try {
+      const { data } = await axios.get(
+        `https://zomatoapp-api.onrender.com/api/Pagination`
+      );
+      setRestaurantList(data.products);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (page === 1) return page;
+    setPage(page - 1);
+  };
+
+  const handleNextPage = () => {
+    if (page === pageCount) return page;
+    setPage(page + 1);
+  };
+
+  useEffect(() => {
+    fetchProductsByPagination();
+    // eslint-disable-next-line
+  }, [page]);
+
+  useEffect(() => {
+    const pagedatacount = Math.ceil(restaurantList.length / 2);
+    setPageCount(pagedatacount);
+
+    if (page) {
+      const limit = 2;
+      const skip = limit * page;
+      const dataSkip = restaurantList.slice(
+        page === 1 ? 0 : skip - limit,
+        skip
+      );
+      setPageData(dataSkip);
+    }
+  }, [restaurantList, page]);
+
   let getLocationList = async () => {
     try {
       let url = "https://zomatoapp-api.onrender.com/api/get-location-list";
@@ -261,7 +307,7 @@ function Search() {
           </div>
           {/* <!-- search result --> */}
           <div className="col-12 col-lg-8 col-md-7">
-            {restaurantList.map((restaurant, index) => {
+            {pageData.length >0 ? ( pageData.map((restaurant, index) => {
               return (
                 <div
                   key={restaurant._id}
@@ -312,18 +358,63 @@ function Search() {
                   </div>
                 </div>
               );
-            })}
+            })):(<div className="fs-1 fw-bold text-secondary">loading...</div>)}
+          </div>
+          <div className="col-12 d-flex justify-content-center mb-4">
+            <span className="fs-5 fw-semibold">Page - {page}</span>
+            <button
+              onClick={handlePrevPage}
+              style={{
+                width: "30px",
+                height: "30px",
+                marginLeft: "10px",
+                marginRight: "10px",
+              }}
+              disabled={page === 1}
+            >
+              &lt;
+            </button>
 
-            <div className="col-12 pagination d-flex justify-content-center">
-              <ul className="pages">
-                <li>&lt;</li>
-                <li className="active">1</li>
-                <li>2</li>
-                <li>3</li>
-                <li>4</li>
-                <li>&gt;</li>
-              </ul>
-            </div>
+            {Array(pageCount)
+              .fill(null)
+              .map((element, index) => {
+                return (
+                  <div>
+                    <button
+                      type="button"
+                      className={
+                        "mx-3" +
+                        `${
+                          page === index + 1
+                            ? "btn rounded-2 mx-2 active-btn"
+                            : "btn rounded-2 mx-2"
+                        }`
+                      }
+                      style={{
+                        width: "30px",
+                        height: "30px",
+                      }}
+                      key={index}
+                      onClick={() => setPage(index + 1)}
+                    >
+                      {index + 1}
+                    </button>
+                  </div>
+                );
+              })}
+
+            <button
+              onClick={handleNextPage}
+              style={{
+                width: "30px",
+                height: "30px",
+                marginLeft: "10px",
+                marginRight: "10px",
+              }}
+              disabled={page === pageCount}
+            >
+              &gt;
+            </button>
           </div>
         </div>
       </div>

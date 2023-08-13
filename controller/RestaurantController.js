@@ -89,7 +89,19 @@ const RestaurantController = {
     } catch (error) {
       res.status(500).send({ error: "Internal server error" });
     }
-  }
-};
+  },
+  Pagination: async (req, res) => {
+    try {
+      const products = await RestaurantModel.find();
+      res.send({
+        call: true,
+        products,
+      });
+    } catch (error) {
+      res.status(500).send({ error: "Internal server error" });
+    }
+  },
+}
+
 
 module.exports = RestaurantController;
